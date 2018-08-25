@@ -1,0 +1,54 @@
+notes.txt
+
+What do we need in order to create a blockchain?
+- A blockchain to add blocks to
+- Blocks to add to the blockchain
+- A dataset to persist the data
+
+
+<======== Importing the necessary modules =========>
+
+const SHA256 = require('crypto-js/sha256');
+const level = require('level');
+const chainDB = './chainDB';
+const db = level(chainDB);
+
+
+<======== Creating a blockchain =========> 
+
+class Blockchain {
+	constructor() {
+		this.chain = [];
+	}
+
+	addBlock(newBlock) {
+		newBlock.height = 0;  														//We need to set the height of the new Block to the length of the chain
+		newBlock.time = new Date().getTime().toString().slice(0,-3);  				// Time stamping the block upon entry into the chain
+		if (this.chain.length > 0 ) {
+			newBlock.previousBlockHash = this.chain[this.chain.length - 1].hash;  	// If there are blocks in the chain, generate a previousBlockHash key
+		}
+		newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();  				// Generating the block hash using SHA256 on the block object
+		this.chain.push(newBlock);  												// Adding the new block to the chain
+	}
+
+	getBlockHeight() {
+		returm this.chain.length;  													//  Returning the height of the chain
+	}
+
+	getBlock(height) {
+		return JSON.parse(JSON.stringify(this.chain[height]));						// Returning a block object using its height
+	}
+}
+
+
+<======== Creating a block =========> 
+
+class Block {
+	constructor(data) {
+		this.height = 0;
+		this.time = 0;
+		this.hash = "";
+		this.previousBlockHash = "";
+		this.body = data;
+	}
+}
