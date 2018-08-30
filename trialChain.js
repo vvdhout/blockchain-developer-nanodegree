@@ -116,7 +116,7 @@ class Blockchain {
 	}
 
 	validateChain() {
-		// THis should be done by iteration versus storing the whole strem... but for now it works..
+		// This should be done by iteration versus storing the whole stream... but for now it works..
 		var getChainPromise = new Promise((resolve, reject) => {
 	        var chain = [];
 			var stream = db.createReadStream();
