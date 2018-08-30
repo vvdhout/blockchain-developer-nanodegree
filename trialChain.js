@@ -116,9 +116,42 @@ class Blockchain {
 	}
 
 	validateChain() {
-
+		// THis should be done by iteration versus storing the whole strem... but for now it works..
+		var getChainPromise = new Promise((resolve, reject) => {
+	        var chain = [];
+			var stream = db.createReadStream();
+			stream.on('data', function(block) {
+				chain.push(block.value)
+			})
+			stream.on('close', function () {
+				resolve(chain);
+		    })
+		})
+		getChainPromise.then((chain) => {
+			var errorLog = [];
+			for (var i = 0; i < chain.length-1; i++) {
+	        // validate block
+	        var returnValidationPr = new Promise ((resolve, reject) => {
+	        	resolve(this.validateBlock(i))
+	        })
+	        returnValidationPr.then((valid) => {
+	        	if (!valid)errorLog.push(i);
+	        })
+	        // compare blocks hash link
+	        let blockHash = chain[i].hash;
+	        let previousHash = chain[i+1].previousBlockHash;
+	        if (blockHash!==previousHash) {
+	          errorLog.push(i);
+	        }
+		    }
+		    if (errorLog.length>0) {
+		        console.log('Block errors = ' + errorLog.length);
+		        console.log('Blocks: '+errorLog);
+		    } else {
+		        console.log('No errors detected');
+		    }
+		})	
 	}
-
 
 }
 
@@ -156,4 +189,12 @@ let firstChain = new Blockchain();
 // // 5. =========== Get block object
 // firstChain.validateBlock(2); 
 
+// // 6. =========== Delete a block
+// db.del(#)
+
+// 7. =========== Hacking the blockchain, 
+// 1) setting a false hash value and 
+// 2) setting a changin some of the data stored in the block.
+
+// // 8. =========== Validating the entire chain, 
 // firstChain.validateChain();
