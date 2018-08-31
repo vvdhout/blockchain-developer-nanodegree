@@ -165,6 +165,7 @@ class Block {
     } 
 }
 
+
 let firstChain = new Blockchain();
 
 // // 1. =========== Adding a new block to the blockchain.
@@ -198,3 +199,51 @@ let firstChain = new Blockchain();
 
 // // 8. =========== Validating the entire chain, 
 // firstChain.validateChain();
+
+
+const express = require('express')
+const app = express()
+const bc = require('./trialChain.js');
+const path = require('path');
+
+// Setting the views folder to call files from
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+
+// Calling the home.ejs file from the views folder when on / 
+app.get('/', (req, res) => { 
+	res.render('home');
+});
+
+
+// Set listen on port 8000;
+app.listen(8000, () => console.log('Example app listening on port 8000!'))
+
+
+// 2.1. =========== GET method route for returning the block object for a specified height.
+app.get('/block/:height', (req, res) => {
+	    var blockHeight = req.params.height;
+	    var getBlockErr = false;
+		let getBlockPromise = new Promise((resolve,reject) => { 
+			db.get(blockHeight, function(err, value) {
+				if(err) {
+					getBlockErr = true;
+					resolve(value);
+				}
+				else {
+					resolve(value);
+				}
+			});
+		});
+		getBlockPromise.then((value) => {
+			if(getBlockErr) {
+				res.send('Sorry. That block does not seem to exists. Try something in the range between 0 and 5.')
+			}
+			else {
+				res.send(value);
+			};
+		})
+})
+
+// 2.2. =========== POST method route for adding a block to the chain with a string of data.
