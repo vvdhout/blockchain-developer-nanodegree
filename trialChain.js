@@ -190,8 +190,10 @@ let firstChain = new Blockchain();
 // // 5. =========== Get block object
 // firstChain.validateBlock(2); 
 
-// // 6. =========== Delete a block
-// db.del(#)
+// // 6. =========== Delete a blocks
+// for(i=0; i < 15; i ++) {
+// 	db.del(i)
+// }
 
 // 7. =========== Hacking the blockchain, 
 // 1) setting a false hash value and 
@@ -201,20 +203,36 @@ let firstChain = new Blockchain();
 // firstChain.validateChain();
 
 
+
 const express = require('express')
 const app = express()
 const bc = require('./trialChain.js');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 // Setting the views folder to call files from
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 
 
 // Calling the home.ejs file from the views folder when on / 
 app.get('/', (req, res) => { 
 	res.render('home');
 });
+
+// Calling block home page
+app.get('/block/', (req, res) => { 
+	res.send('To pull block data from the blockchain, add the number for the height of the block you want to see to the url (e.g. /block/3/).');
+});
+
+// Calling the addblock page
+app.get('/block/add/', (req, res) => { 
+	res.render('addblock');
+});
+
 
 
 // Set listen on port 8000;
@@ -238,7 +256,7 @@ app.get('/block/:height', (req, res) => {
 		});
 		getBlockPromise.then((value) => {
 			if(getBlockErr) {
-				res.send('Sorry. That block does not seem to exists. Try something in the range between 0 and 5.')
+				res.send('Sorry. That block does not seem to exists yet. Try something in a lower range.')
 			}
 			else {
 				res.send(value);
@@ -247,3 +265,38 @@ app.get('/block/:height', (req, res) => {
 })
 
 // 2.2. =========== POST method route for adding a block to the chain with a string of data.
+
+app.post('/block/adding', function(req, res) {
+	var newBlockData = req.body._data;
+	var addPromise = new Promise((resolve,reject) => { 
+		firstChain.addBlock(new Block(newBlockData));
+		resolve(true);
+	});
+	setTimeout(function() { 
+		addPromise.then(() => {
+		getChainLength.then((blockCount) => {
+				let chainHeight = blockCount;
+			    var getBlockErr = false;
+				let getBlockPromise = new Promise((resolve,reject) => { 
+					db.get(chainHeight, function(err, value) {
+						if(err) {
+							getBlockErr = true;
+							resolve(value);
+						}
+						else {
+							resolve(value);
+						}
+					});
+				});
+				getBlockPromise.then((value) => {
+					if(getBlockErr) {
+						res.send('Sorry. That block does not seem to exists yet. Try something in a lower range.')
+					}
+					else {
+						res.send(value);
+					};
+				})
+		})
+	})}, 2000);
+})
+
