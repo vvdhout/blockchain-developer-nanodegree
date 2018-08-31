@@ -59,3 +59,14 @@ for (var i = 0; i < inducedErrorBlocks.length; i++) {
 ```
 blockchain.validateChain();
 ```
+
+
+## API usage
+
+We have added a web API that runs on the localhost 8000 port. By running trialChain.js file in node from the command prompt, the web application will initialize.
+
+The application has two main functions:
+1. Add a block to the chain and return its object (containing data on hash, previousBlockHash, height, data, and time)
+- This can be done by navigating to /block/add/ and filling in the desired data to be added;
+2. Returning a block including the aforementioned data by giving its height.
+- This can be done by navigating to /block/[height]/ replacing [height] with a number.
